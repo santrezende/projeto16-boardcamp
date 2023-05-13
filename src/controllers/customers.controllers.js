@@ -19,7 +19,10 @@ export async function createNewCustomer (req, res) {
 
 export async function getCustomers (req, res) {
     try {
-        const customers = await db.query(`SELECT * FROM customers;`)
+        const customers = await db.query(`
+        SELECT id, name, phone, cpf, to_char(birthday, 'YYYY-MM-DD')
+        as birthday FROM customers;
+        `)
         return res.status(200).send(customers.rows)
     } catch (err) {
         return res.status(500).send(err.message)
@@ -30,9 +33,12 @@ export async function getCustomerById (req, res) {
     const { id } = req.params
 
     try{
-        const customer = await db.query(`SELECT * FROM customers WHERE id = $1`, [id])
+        const customer = await db.query(`
+        SELECT id, name, phone, cpf, to_char(birthday, 'YYYY-MM-DD')
+        as birthday FROM customers WHERE id = $1;
+        `, [id])
 
-        if (customer.rows.length === 0) return res.status(400).send("customer not found")
+        if (customer.rows.length === 0) return res.status(404).send("customer not found")
 
         return res.status(200).send(customer.rows[0])
     } catch (err) {
@@ -45,6 +51,9 @@ export async function updateCustomer (req, res) {
     const { id } = req.params
     
     try{
+
+        const existingCustomer = await db.query(`SELECT * FROM customers WHERE cpf = $1`, [cpf])
+        if (existingCustomer.rows.length > 0) return res.status(409).send("Já existe uma conta com esse CPF.")
 
         const query = "UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5"
         const values = [name, phone, cpf, birthday, id]
