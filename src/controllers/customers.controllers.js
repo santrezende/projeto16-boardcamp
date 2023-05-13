@@ -52,7 +52,7 @@ export async function updateCustomer (req, res) {
     
     try{
 
-        const existingCustomer = await db.query(`SELECT * FROM customers WHERE cpf = $1`, [cpf])
+        const existingCustomer = await db.query(`SELECT * FROM customers WHERE cpf = $1 AND id != $2`, [cpf, id])
         if (existingCustomer.rows.length > 0) return res.status(409).send("Já existe uma conta com esse CPF.")
 
         const query = "UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5"
