@@ -35,7 +35,7 @@ export async function addRental (req, res) {
         await db.query(`INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee")
         VALUES ($1, $2, $3, $4, $5, $6, $7);`, values)
 
-        return res.sendStatus(200)
+        return res.sendStatus(201)
     } catch (err) {
         return res.status(500).send(err.message)
     }
