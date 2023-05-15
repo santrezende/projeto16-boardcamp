@@ -42,14 +42,35 @@ export async function addRental (req, res) {
 }
 
 export async function getRentals (req, res) {
+    const { order, desc } = req.query
+    let query = `SELECT rentals.*,
+    customers.name AS "customerName", 
+    games.name AS "gameName" 
+    FROM rentals 
+    JOIN customers ON customers.id = rentals."customerId"
+    JOIN games ON games.id = rentals."gameId"`
+
+    const filters = [
+        "id",
+        "customerId",
+        "gameId",
+        "rentDate",
+        "daysRented",
+        "returnDate",
+        "originalPrice",
+        "delayFee",
+        "customer_name",
+        "game_name",
+      ]
+
+    if(order && filters.includes(order)) {
+
+    query += ` ORDER BY "${order}"${desc === "true" ? ` DESC` : ``}`
+    }
+    query += `;`
+
     try{
-        const result = await db.query(`
-        SELECT rentals.*,
-        customers.name AS "customerName", 
-        games.name AS "gameName" 
-        FROM rentals 
-        JOIN customers ON customers.id = rentals."customerId"
-        JOIN games ON games.id = rentals."gameId";`)
+        const result = await db.query(query)
 
         const rentals = result.rows.map(rental => ({
             id: rental.id,

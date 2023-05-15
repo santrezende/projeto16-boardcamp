@@ -18,11 +18,17 @@ export async function createNewCustomer (req, res) {
 }
 
 export async function getCustomers (req, res) {
+    const { order, desc } = req.query
+    let query = `SELECT id, name, phone, cpf, to_char(birthday, 'YYYY-MM-DD') as birthday FROM customers`
+
+    const filters = ["id", "name", "phone", "cpf", "birthday"]
+
+    if(order && filters.includes(order)) {
+        query += ` ORDER BY "${order}"${desc === "true" ? ` DESC` : ``}`
+    }
+    query += `;`
     try {
-        const customers = await db.query(`
-        SELECT id, name, phone, cpf, to_char(birthday, 'YYYY-MM-DD')
-        as birthday FROM customers;
-        `)
+        const customers = await db.query(query)
         return res.status(200).send(customers.rows)
     } catch (err) {
         return res.status(500).send(err.message)

@@ -21,9 +21,19 @@ export async function createGame(req, res) {
 }
 
 export async function getGames(req, res) {
-    try {
+    const { order, desc } = req.query
+    let query = `SELECT * FROM games`
 
-        const games = await db.query(`SELECT * FROM games;`)
+    const filters = ["id", "name", "image", "stockTotal", "pricePerDay"]
+
+    if(order && filters.includes(order)) {
+
+    query += ` ORDER BY "${order}"${desc === "true" ? ` DESC` : ``}`
+    }
+    query += `;`
+
+    try {
+        const games = await db.query(query)
         return res.status(200).send(games.rows)
 
     } catch (err) {
